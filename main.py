@@ -17,10 +17,14 @@ pygame.display.set_caption("Space Defender")
 
 relogio = pygame.time.Clock()
 
-# Fontes
+# =========================
+# FONTES
+# =========================
+
 fonte = pygame.font.Font(None, 36)
 fonte_grande = pygame.font.Font(None, 80)
 fonte_media = pygame.font.Font(None, 42)
+fonte_pequena = pygame.font.Font(None, 30)
 
 # =========================
 # CARREGAMENTO DO CENÁRIO
@@ -46,7 +50,6 @@ background4 = pygame.image.load(
     "assets/images/Level3Bg4.png"
 ).convert_alpha()
 
-# Redimensiona as camadas
 background0 = pygame.transform.scale(background0, (LARGURA, ALTURA))
 background1 = pygame.transform.scale(background1, (LARGURA, ALTURA))
 background2 = pygame.transform.scale(background2, (LARGURA, ALTURA))
@@ -60,10 +63,10 @@ background4 = pygame.transform.scale(background4, (LARGURA, ALTURA))
 JOGADOR_LARGURA = 60
 JOGADOR_ALTURA = 40
 
+velocidade_jogador = 5
+
 jogador_x = 100
 jogador_y = ALTURA // 2
-
-velocidade_jogador = 5
 
 vidas = 3
 
@@ -94,6 +97,8 @@ imagem_inimigo = pygame.transform.scale(
     (INIMIGO_LARGURA, INIMIGO_ALTURA)
 )
 
+velocidade_inimigo = 3
+
 inimigo_x = 700
 
 inimigo_y = random.randint(
@@ -101,23 +106,86 @@ inimigo_y = random.randint(
     ALTURA - INIMIGO_ALTURA
 )
 
-velocidade_inimigo = 3
-
 # =========================
 # PONTUAÇÃO
 # =========================
 
 pontos = 0
 
-# Ao destruir 10 inimigos, o jogador vence
 META_VITORIA = 10
 
 # =========================
-# ESTADO DO JOGO
+# ESTADOS DO JOGO
 # =========================
 
-jogo_terminado = False
-vitoria = False
+MENU = "menu"
+JOGANDO = "jogando"
+GAME_OVER = "game_over"
+VITORIA = "vitoria"
+
+estado_jogo = MENU
+
+# =========================
+# FUNÇÃO PARA REINICIAR
+# =========================
+
+def reiniciar_jogo():
+
+    global jogador_x
+    global jogador_y
+    global vidas
+    global pontos
+    global tiros
+    global inimigo_x
+    global inimigo_y
+
+    jogador_x = 100
+    jogador_y = ALTURA // 2
+
+    vidas = 3
+    pontos = 0
+
+    tiros = []
+
+    inimigo_x = 700
+
+    inimigo_y = random.randint(
+        0,
+        ALTURA - INIMIGO_ALTURA
+    )
+
+# =========================
+# FUNÇÃO PARA DESENHAR CENÁRIO
+# =========================
+
+def desenhar_cenario():
+
+    tela.blit(background0, (0, 0))
+    tela.blit(background1, (0, 0))
+    tela.blit(background2, (0, 0))
+    tela.blit(background3, (0, 0))
+    tela.blit(background4, (0, 0))
+
+# =========================
+# FUNÇÃO PARA CENTRALIZAR TEXTO
+# =========================
+
+def desenhar_texto_centralizado(texto, fonte_usada, cor, y):
+
+    superficie = fonte_usada.render(
+        texto,
+        True,
+        cor
+    )
+
+    retangulo = superficie.get_rect(
+        center=(LARGURA // 2, y)
+    )
+
+    tela.blit(
+        superficie,
+        retangulo
+    )
 
 # =========================
 # LOOP PRINCIPAL
@@ -138,23 +206,62 @@ while executando:
 
         if evento.type == pygame.KEYDOWN:
 
-            # Só permite atirar se o jogo ainda estiver acontecendo
-            if evento.key == pygame.K_SPACE and not jogo_terminado:
+            # =========================
+            # EVENTOS DO MENU
+            # =========================
 
-                novo_tiro = pygame.Rect(
-                    jogador_x + JOGADOR_LARGURA,
-                    jogador_y + JOGADOR_ALTURA // 2 - TIRO_ALTURA // 2,
-                    TIRO_LARGURA,
-                    TIRO_ALTURA
-                )
+            if estado_jogo == MENU:
 
-                tiros.append(novo_tiro)
+                if evento.key == pygame.K_RETURN:
+
+                    reiniciar_jogo()
+                    estado_jogo = JOGANDO
+
+                elif evento.key == pygame.K_ESCAPE:
+
+                    executando = False
+
+            # =========================
+            # EVENTOS DURANTE O JOGO
+            # =========================
+
+            elif estado_jogo == JOGANDO:
+
+                if evento.key == pygame.K_SPACE:
+
+                    novo_tiro = pygame.Rect(
+                        jogador_x + JOGADOR_LARGURA,
+                        jogador_y + JOGADOR_ALTURA // 2 - TIRO_ALTURA // 2,
+                        TIRO_LARGURA,
+                        TIRO_ALTURA
+                    )
+
+                    tiros.append(novo_tiro)
+
+                elif evento.key == pygame.K_ESCAPE:
+
+                    estado_jogo = MENU
+
+            # =========================
+            # EVENTOS DA TELA FINAL
+            # =========================
+
+            elif estado_jogo == GAME_OVER or estado_jogo == VITORIA:
+
+                if evento.key == pygame.K_RETURN:
+
+                    reiniciar_jogo()
+                    estado_jogo = JOGANDO
+
+                elif evento.key == pygame.K_ESCAPE:
+
+                    estado_jogo = MENU
 
     # =========================
-    # LÓGICA DO JOGO
+    # LÓGICA DA PARTIDA
     # =========================
 
-    if not jogo_terminado:
+    if estado_jogo == JOGANDO:
 
         # =========================
         # MOVIMENTAÇÃO DO JOGADOR
@@ -190,7 +297,6 @@ while executando:
         if jogador_y > ALTURA - JOGADOR_ALTURA:
             jogador_y = ALTURA - JOGADOR_ALTURA
 
-        # Retângulo usado para detectar colisões
         jogador_rect = pygame.Rect(
             jogador_x,
             jogador_y,
@@ -205,7 +311,6 @@ while executando:
         for tiro in tiros:
             tiro.x += velocidade_tiro
 
-        # Remove tiros que saíram da tela
         tiros = [
             tiro
             for tiro in tiros
@@ -237,10 +342,8 @@ while executando:
 
                 pontos += 1
 
-                # Inimigo reaparece à direita
                 inimigo_x = LARGURA
 
-                # Em uma altura diferente
                 inimigo_y = random.randint(
                     0,
                     ALTURA - INIMIGO_ALTURA
@@ -248,10 +351,7 @@ while executando:
 
                 break
 
-        # =========================
-        # ATUALIZA RETÂNGULO INIMIGO
-        # =========================
-
+        # Atualiza o retângulo do inimigo
         inimigo_rect = pygame.Rect(
             inimigo_x,
             inimigo_y,
@@ -290,111 +390,181 @@ while executando:
             )
 
         # =========================
-        # CONDIÇÃO DE DERROTA
+        # DERROTA
         # =========================
 
         if vidas <= 0:
 
-            # Impede que apareçam vidas negativas
             vidas = 0
-
-            jogo_terminado = True
-            vitoria = False
+            estado_jogo = GAME_OVER
 
         # =========================
-        # CONDIÇÃO DE VITÓRIA
+        # VITÓRIA
         # =========================
 
         if pontos >= META_VITORIA:
 
-            jogo_terminado = True
-            vitoria = True
+            estado_jogo = VITORIA
 
     # =========================
-    # DESENHA O CENÁRIO
+    # DESENHA CENÁRIO
     # =========================
 
-    tela.blit(background0, (0, 0))
-    tela.blit(background1, (0, 0))
-    tela.blit(background2, (0, 0))
-    tela.blit(background3, (0, 0))
-    tela.blit(background4, (0, 0))
+    desenhar_cenario()
 
     # =========================
-    # DESENHA O JOGADOR
+    # TELA DO MENU
     # =========================
 
-    pygame.draw.rect(
-        tela,
-        (0, 255, 0),
-        (
-            jogador_x,
-            jogador_y,
-            JOGADOR_LARGURA,
-            JOGADOR_ALTURA
+    if estado_jogo == MENU:
+
+        camada_escura = pygame.Surface(
+            (LARGURA, ALTURA),
+            pygame.SRCALPHA
         )
-    )
+
+        camada_escura.fill(
+            (0, 0, 0, 150)
+        )
+
+        tela.blit(
+            camada_escura,
+            (0, 0)
+        )
+
+        desenhar_texto_centralizado(
+            "SPACE DEFENDER",
+            fonte_grande,
+            (255, 255, 255),
+            75
+        )
+
+        desenhar_texto_centralizado(
+            "Destrua 10 inimigos para vencer!",
+            fonte,
+            (255, 255, 0),
+            135
+        )
+
+        desenhar_texto_centralizado(
+            "CONTROLES",
+            fonte_media,
+            (0, 255, 255),
+            195
+        )
+
+        desenhar_texto_centralizado(
+            "W / SETA CIMA  -  Mover para cima",
+            fonte_pequena,
+            (255, 255, 255),
+            240
+        )
+
+        desenhar_texto_centralizado(
+            "S / SETA BAIXO  -  Mover para baixo",
+            fonte_pequena,
+            (255, 255, 255),
+            275
+        )
+
+        desenhar_texto_centralizado(
+            "A / SETA ESQUERDA  -  Mover para esquerda",
+            fonte_pequena,
+            (255, 255, 255),
+            310
+        )
+
+        desenhar_texto_centralizado(
+            "D / SETA DIREITA  -  Mover para direita",
+            fonte_pequena,
+            (255, 255, 255),
+            345
+        )
+
+        desenhar_texto_centralizado(
+            "ESPACO  -  Atirar",
+            fonte_pequena,
+            (255, 255, 255),
+            380
+        )
+
+        desenhar_texto_centralizado(
+            "ENTER - INICIAR",
+            fonte_media,
+            (0, 255, 0),
+            445
+        )
+
+        desenhar_texto_centralizado(
+            "ESC - SAIR",
+            fonte_pequena,
+            (255, 255, 255),
+            490
+        )
 
     # =========================
-    # DESENHA OS TIROS
+    # TELA DO JOGO
     # =========================
 
-    for tiro in tiros:
+    elif estado_jogo == JOGANDO:
 
+        # Jogador
         pygame.draw.rect(
             tela,
-            (255, 255, 0),
-            tiro
+            (0, 255, 0),
+            (
+                jogador_x,
+                jogador_y,
+                JOGADOR_LARGURA,
+                JOGADOR_ALTURA
+            )
         )
 
-    # =========================
-    # DESENHA O INIMIGO
-    # =========================
+        # Tiros
+        for tiro in tiros:
 
-    if not jogo_terminado:
+            pygame.draw.rect(
+                tela,
+                (255, 255, 0),
+                tiro
+            )
 
+        # Inimigo
         tela.blit(
             imagem_inimigo,
             (inimigo_x, inimigo_y)
         )
 
-    # =========================
-    # MOSTRA PONTUAÇÃO
-    # =========================
+        # Pontuação
+        texto_pontos = fonte.render(
+            f"Pontos: {pontos}/{META_VITORIA}",
+            True,
+            (255, 255, 255)
+        )
 
-    texto_pontos = fonte.render(
-        f"Pontos: {pontos}/{META_VITORIA}",
-        True,
-        (255, 255, 255)
-    )
+        tela.blit(
+            texto_pontos,
+            (20, 20)
+        )
 
-    tela.blit(
-        texto_pontos,
-        (20, 20)
-    )
+        # Vidas
+        texto_vidas = fonte.render(
+            f"Vidas: {vidas}",
+            True,
+            (255, 255, 255)
+        )
 
-    # =========================
-    # MOSTRA VIDAS
-    # =========================
-
-    texto_vidas = fonte.render(
-        f"Vidas: {vidas}",
-        True,
-        (255, 255, 255)
-    )
-
-    tela.blit(
-        texto_vidas,
-        (LARGURA - 140, 20)
-    )
+        tela.blit(
+            texto_vidas,
+            (LARGURA - 140, 20)
+        )
 
     # =========================
-    # TELA FINAL
+    # GAME OVER
     # =========================
 
-    if jogo_terminado:
+    elif estado_jogo == GAME_OVER:
 
-        # Cria uma camada preta transparente
         camada_escura = pygame.Surface(
             (LARGURA, ALTURA),
             pygame.SRCALPHA
@@ -409,59 +579,80 @@ while executando:
             (0, 0)
         )
 
-        # -------------------------
-        # VITÓRIA
-        # -------------------------
+        desenhar_texto_centralizado(
+            "GAME OVER",
+            fonte_grande,
+            (255, 0, 0),
+            220
+        )
 
-        if vitoria:
+        desenhar_texto_centralizado(
+            f"Pontuacao: {pontos}/{META_VITORIA}",
+            fonte_media,
+            (255, 255, 255),
+            290
+        )
 
-            mensagem = fonte_grande.render(
-                "VOCE VENCEU!",
-                True,
-                (0, 255, 0)
-            )
+        desenhar_texto_centralizado(
+            "ENTER - Jogar novamente",
+            fonte,
+            (0, 255, 0),
+            360
+        )
 
-        # -------------------------
-        # DERROTA
-        # -------------------------
+        desenhar_texto_centralizado(
+            "ESC - Voltar ao menu",
+            fonte_pequena,
+            (255, 255, 255),
+            410
+        )
 
-        else:
+    # =========================
+    # VITÓRIA
+    # =========================
 
-            mensagem = fonte_grande.render(
-                "GAME OVER",
-                True,
-                (255, 0, 0)
-            )
+    elif estado_jogo == VITORIA:
 
-        mensagem_rect = mensagem.get_rect(
-            center=(
-                LARGURA // 2,
-                ALTURA // 2
-            )
+        camada_escura = pygame.Surface(
+            (LARGURA, ALTURA),
+            pygame.SRCALPHA
+        )
+
+        camada_escura.fill(
+            (0, 0, 0, 190)
         )
 
         tela.blit(
-            mensagem,
-            mensagem_rect
+            camada_escura,
+            (0, 0)
         )
 
-        # Mensagem auxiliar
-        mensagem_sair = fonte_media.render(
-            "Feche a janela para sair",
-            True,
-            (255, 255, 255)
+        desenhar_texto_centralizado(
+            "VOCE VENCEU!",
+            fonte_grande,
+            (0, 255, 0),
+            220
         )
 
-        mensagem_sair_rect = mensagem_sair.get_rect(
-            center=(
-                LARGURA // 2,
-                ALTURA // 2 + 70
-            )
+        desenhar_texto_centralizado(
+            f"Voce destruiu {pontos} inimigos!",
+            fonte_media,
+            (255, 255, 255),
+            290
         )
 
-        tela.blit(
-            mensagem_sair,
-            mensagem_sair_rect
+        desenhar_texto_centralizado(
+            "ENTER - Jogar novamente",
+            fonte,
+            (0, 255, 0),
+            360
+        )
+
+        desenhar_texto_centralizado(
+            "ESC - Voltar ao menu",
+            fonte_pequena,
+            (255, 255, 255),
+            410
         )
 
     # =========================
