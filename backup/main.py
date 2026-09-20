@@ -60,22 +60,20 @@ background4 = pygame.transform.scale(background4, (LARGURA, ALTURA))
 # JOGADOR
 # =========================
 
-# Carrega a imagem da nave
 imagem_jogador = pygame.image.load(
     "assets/images/playerShip1_red.png"
 ).convert_alpha()
 
-# Rotaciona a nave 90 graus para a direita
+# A imagem original aponta para cima.
+# Rotacionamos para a direita.
 imagem_jogador = pygame.transform.rotate(
     imagem_jogador,
     -90
 )
 
-# Tamanho da nave no jogo
 JOGADOR_LARGURA = 75
 JOGADOR_ALTURA = 55
 
-# Redimensiona a nave
 imagem_jogador = pygame.transform.scale(
     imagem_jogador,
     (JOGADOR_LARGURA, JOGADOR_ALTURA)
@@ -89,11 +87,27 @@ jogador_y = ALTURA // 2
 vidas = 3
 
 # =========================
-# TIROS
+# LASER
 # =========================
 
-TIRO_LARGURA = 20
-TIRO_ALTURA = 6
+imagem_laser = pygame.image.load(
+    "assets/images/laserRed01.png"
+).convert_alpha()
+
+# O laser original está na vertical.
+# Rotacionamos para apontar para a direita.
+imagem_laser = pygame.transform.rotate(
+    imagem_laser,
+    -90
+)
+
+TIRO_LARGURA = 32
+TIRO_ALTURA = 8
+
+imagem_laser = pygame.transform.scale(
+    imagem_laser,
+    (TIRO_LARGURA, TIRO_ALTURA)
+)
 
 velocidade_tiro = 10
 
@@ -247,7 +261,6 @@ while executando:
 
                 if evento.key == pygame.K_SPACE:
 
-                    # O tiro nasce na ponta da nave
                     novo_tiro = pygame.Rect(
                         jogador_x + JOGADOR_LARGURA,
                         jogador_y + JOGADOR_ALTURA // 2 - TIRO_ALTURA // 2,
@@ -316,7 +329,6 @@ while executando:
         if jogador_y > ALTURA - JOGADOR_ALTURA:
             jogador_y = ALTURA - JOGADOR_ALTURA
 
-        # Retângulo usado para colisão
         jogador_rect = pygame.Rect(
             jogador_x,
             jogador_y,
@@ -325,7 +337,7 @@ while executando:
         )
 
         # =========================
-        # MOVIMENTAÇÃO DOS TIROS
+        # MOVIMENTAÇÃO DOS LASERS
         # =========================
 
         for tiro in tiros:
@@ -351,7 +363,7 @@ while executando:
         )
 
         # =========================
-        # COLISÃO: TIRO X INIMIGO
+        # COLISÃO: LASER X INIMIGO
         # =========================
 
         for tiro in tiros[:]:
@@ -433,7 +445,7 @@ while executando:
     desenhar_cenario()
 
     # =========================
-    # TELA DO MENU
+    # MENU
     # =========================
 
     if estado_jogo == MENU:
@@ -523,45 +535,35 @@ while executando:
         )
 
     # =========================
-    # TELA DO JOGO
+    # JOGO
     # =========================
 
     elif estado_jogo == JOGANDO:
 
-        # =========================
-        # DESENHA A NAVE DO JOGADOR
-        # =========================
-
+        # Nave
         tela.blit(
             imagem_jogador,
             (jogador_x, jogador_y)
         )
 
         # =========================
-        # DESENHA OS TIROS
+        # DESENHA OS LASERS
         # =========================
 
         for tiro in tiros:
 
-            pygame.draw.rect(
-                tela,
-                (255, 255, 0),
-                tiro
+            tela.blit(
+                imagem_laser,
+                (tiro.x, tiro.y)
             )
 
-        # =========================
-        # DESENHA O INIMIGO
-        # =========================
-
+        # Inimigo
         tela.blit(
             imagem_inimigo,
             (inimigo_x, inimigo_y)
         )
 
-        # =========================
-        # PONTUAÇÃO
-        # =========================
-
+        # Pontuação
         texto_pontos = fonte.render(
             f"Pontos: {pontos}/{META_VITORIA}",
             True,
@@ -573,10 +575,7 @@ while executando:
             (20, 20)
         )
 
-        # =========================
-        # VIDAS
-        # =========================
-
+        # Vidas
         texto_vidas = fonte.render(
             f"Vidas: {vidas}",
             True,
@@ -692,5 +691,4 @@ while executando:
 
     relogio.tick(FPS)
 
-# Encerra o Pygame
 pygame.quit()
