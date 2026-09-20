@@ -51,25 +51,10 @@ class Game:
         # FONTES
         # =========================
 
-        self.fonte = pygame.font.Font(
-            None,
-            36
-        )
-
-        self.fonte_grande = pygame.font.Font(
-            None,
-            80
-        )
-
-        self.fonte_media = pygame.font.Font(
-            None,
-            42
-        )
-
-        self.fonte_pequena = pygame.font.Font(
-            None,
-            30
-        )
+        self.fonte = pygame.font.Font(None, 36)
+        self.fonte_grande = pygame.font.Font(None, 80)
+        self.fonte_media = pygame.font.Font(None, 42)
+        self.fonte_pequena = pygame.font.Font(None, 30)
 
         # =========================
         # BACKGROUNDS
@@ -100,7 +85,6 @@ class Game:
         # =========================
 
         self.player = Player()
-
         self.enemy = Enemy()
 
         # =========================
@@ -108,7 +92,6 @@ class Game:
         # =========================
 
         self.player_projectiles = []
-
         self.enemy_projectiles = []
 
         # =========================
@@ -425,13 +408,9 @@ class Game:
 
         elif self.estado == GAME_OVER:
 
-            self.draw_game()
-
             self.draw_game_over()
 
         elif self.estado == VITORIA:
-
-            self.draw_game()
 
             self.draw_victory()
 
@@ -459,17 +438,17 @@ class Game:
             self.screen
         )
 
-        # Inimigo
-        self.enemy.draw(
-            self.screen
-        )
-
         # Tiros do jogador
         for tiro in self.player_projectiles:
 
             tiro.draw(
                 self.screen
             )
+
+        # Inimigo
+        self.enemy.draw(
+            self.screen
+        )
 
         # Tiros do inimigo
         for tiro in self.enemy_projectiles:
@@ -506,12 +485,7 @@ class Game:
 
         self.screen.blit(
             texto_vidas,
-            (
-                LARGURA
-                - texto_vidas.get_width()
-                - 20,
-                20
-            )
+            (LARGURA - 140, 20)
         )
 
     # =========================
@@ -520,69 +494,89 @@ class Game:
 
     def draw_menu(self):
 
-        overlay = pygame.Surface(
+        camada_escura = pygame.Surface(
             (LARGURA, ALTURA),
             pygame.SRCALPHA
         )
 
-        overlay.fill(
+        camada_escura.fill(
             (0, 0, 0, 150)
         )
 
         self.screen.blit(
-            overlay,
+            camada_escura,
             (0, 0)
         )
 
-        titulo = self.fonte_grande.render(
+        self.desenhar_texto_centralizado(
             "SPACE DEFENDER",
-            True,
-            (255, 255, 255)
+            self.fonte_grande,
+            (255, 255, 255),
+            75
         )
 
-        objetivo = self.fonte_media.render(
+        self.desenhar_texto_centralizado(
             "Destrua 10 inimigos para vencer!",
-            True,
-            (255, 255, 255)
+            self.fonte,
+            (255, 255, 0),
+            135
         )
 
-        controles = [
+        self.desenhar_texto_centralizado(
             "CONTROLES",
-            "W / SETA CIMA - Mover para cima",
-            "S / SETA BAIXO - Mover para baixo",
-            "A / SETA ESQUERDA - Mover para esquerda",
-            "D / SETA DIREITA - Mover para direita",
-            "ESPACO - Atirar",
+            self.fonte_media,
+            (0, 255, 255),
+            195
+        )
+
+        self.desenhar_texto_centralizado(
+            "W / SETA CIMA  -  Mover para cima",
+            self.fonte_pequena,
+            (255, 255, 255),
+            240
+        )
+
+        self.desenhar_texto_centralizado(
+            "S / SETA BAIXO  -  Mover para baixo",
+            self.fonte_pequena,
+            (255, 255, 255),
+            275
+        )
+
+        self.desenhar_texto_centralizado(
+            "A / SETA ESQUERDA  -  Mover para esquerda",
+            self.fonte_pequena,
+            (255, 255, 255),
+            310
+        )
+
+        self.desenhar_texto_centralizado(
+            "D / SETA DIREITA  -  Mover para direita",
+            self.fonte_pequena,
+            (255, 255, 255),
+            345
+        )
+
+        self.desenhar_texto_centralizado(
+            "ESPACO  -  Atirar",
+            self.fonte_pequena,
+            (255, 255, 255),
+            380
+        )
+
+        self.desenhar_texto_centralizado(
             "ENTER - INICIAR",
-            "ESC - SAIR"
-        ]
-
-        self.centralizar_texto(
-            titulo,
-            60
+            self.fonte_media,
+            (0, 255, 0),
+            445
         )
 
-        self.centralizar_texto(
-            objetivo,
-            140
+        self.desenhar_texto_centralizado(
+            "ESC - SAIR",
+            self.fonte_pequena,
+            (255, 255, 255),
+            490
         )
-
-        y = 220
-
-        for texto in controles:
-
-            superficie = self.fonte_pequena.render(
-                texto,
-                True,
-                (255, 255, 255)
-            )
-
-            self.centralizar_texto(
-                superficie,
-                y
-            )
-
-            y += 35
 
     # =========================
     # GAME OVER
@@ -590,51 +584,46 @@ class Game:
 
     def draw_game_over(self):
 
-        overlay = pygame.Surface(
+        camada_escura = pygame.Surface(
             (LARGURA, ALTURA),
             pygame.SRCALPHA
         )
 
-        overlay.fill(
-            (0, 0, 0, 180)
+        camada_escura.fill(
+            (0, 0, 0, 190)
         )
 
         self.screen.blit(
-            overlay,
+            camada_escura,
             (0, 0)
         )
 
-        titulo = self.fonte_grande.render(
+        self.desenhar_texto_centralizado(
             "GAME OVER",
-            True,
-            (255, 255, 255)
+            self.fonte_grande,
+            (255, 0, 0),
+            220
         )
 
-        reiniciar = self.fonte_media.render(
+        self.desenhar_texto_centralizado(
+            f"Pontuacao: {self.pontos}/{META_VITORIA}",
+            self.fonte_media,
+            (255, 255, 255),
+            290
+        )
+
+        self.desenhar_texto_centralizado(
             "ENTER - Jogar novamente",
-            True,
-            (255, 255, 255)
+            self.fonte,
+            (0, 255, 0),
+            360
         )
 
-        menu = self.fonte_media.render(
+        self.desenhar_texto_centralizado(
             "ESC - Voltar ao menu",
-            True,
-            (255, 255, 255)
-        )
-
-        self.centralizar_texto(
-            titulo,
-            170
-        )
-
-        self.centralizar_texto(
-            reiniciar,
-            280
-        )
-
-        self.centralizar_texto(
-            menu,
-            330
+            self.fonte_pequena,
+            (255, 255, 255),
+            410
         )
 
     # =========================
@@ -643,71 +632,73 @@ class Game:
 
     def draw_victory(self):
 
-        overlay = pygame.Surface(
+        camada_escura = pygame.Surface(
             (LARGURA, ALTURA),
             pygame.SRCALPHA
         )
 
-        overlay.fill(
-            (0, 0, 0, 180)
+        camada_escura.fill(
+            (0, 0, 0, 190)
         )
 
         self.screen.blit(
-            overlay,
+            camada_escura,
             (0, 0)
         )
 
-        titulo = self.fonte_grande.render(
-            "VOCÊ VENCEU!",
-            True,
-            (255, 255, 255)
+        self.desenhar_texto_centralizado(
+            "VOCE VENCEU!",
+            self.fonte_grande,
+            (0, 255, 0),
+            220
         )
 
-        reiniciar = self.fonte_media.render(
+        self.desenhar_texto_centralizado(
+            f"Voce destruiu {self.pontos} inimigos!",
+            self.fonte_media,
+            (255, 255, 255),
+            290
+        )
+
+        self.desenhar_texto_centralizado(
             "ENTER - Jogar novamente",
-            True,
-            (255, 255, 255)
+            self.fonte,
+            (0, 255, 0),
+            360
         )
 
-        menu = self.fonte_media.render(
+        self.desenhar_texto_centralizado(
             "ESC - Voltar ao menu",
-            True,
-            (255, 255, 255)
-        )
-
-        self.centralizar_texto(
-            titulo,
-            170
-        )
-
-        self.centralizar_texto(
-            reiniciar,
-            280
-        )
-
-        self.centralizar_texto(
-            menu,
-            330
+            self.fonte_pequena,
+            (255, 255, 255),
+            410
         )
 
     # =========================
     # CENTRALIZAR TEXTO
     # =========================
 
-    def centralizar_texto(
+    def desenhar_texto_centralizado(
         self,
-        superficie,
+        texto,
+        fonte_usada,
+        cor,
         y
     ):
 
-        x = (
-            LARGURA
-            - superficie.get_width()
-        ) // 2
+        superficie = fonte_usada.render(
+            texto,
+            True,
+            cor
+        )
+
+        retangulo = superficie.get_rect(
+            center=(LARGURA // 2, y)
+        )
 
         self.screen.blit(
             superficie,
-            (x, y)
+            retangulo
         )
 
     # =========================
