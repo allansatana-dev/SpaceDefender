@@ -60,8 +60,24 @@ background4 = pygame.transform.scale(background4, (LARGURA, ALTURA))
 # JOGADOR
 # =========================
 
-JOGADOR_LARGURA = 60
-JOGADOR_ALTURA = 40
+imagem_jogador = pygame.image.load(
+    "assets/images/playerShip1_red.png"
+).convert_alpha()
+
+# A imagem original aponta para cima.
+# Rotacionamos para a direita.
+imagem_jogador = pygame.transform.rotate(
+    imagem_jogador,
+    -90
+)
+
+JOGADOR_LARGURA = 75
+JOGADOR_ALTURA = 55
+
+imagem_jogador = pygame.transform.scale(
+    imagem_jogador,
+    (JOGADOR_LARGURA, JOGADOR_ALTURA)
+)
 
 velocidade_jogador = 5
 
@@ -71,11 +87,27 @@ jogador_y = ALTURA // 2
 vidas = 3
 
 # =========================
-# TIROS
+# LASER
 # =========================
 
-TIRO_LARGURA = 20
-TIRO_ALTURA = 6
+imagem_laser = pygame.image.load(
+    "assets/images/laserRed01.png"
+).convert_alpha()
+
+# O laser original está na vertical.
+# Rotacionamos para apontar para a direita.
+imagem_laser = pygame.transform.rotate(
+    imagem_laser,
+    -90
+)
+
+TIRO_LARGURA = 32
+TIRO_ALTURA = 8
+
+imagem_laser = pygame.transform.scale(
+    imagem_laser,
+    (TIRO_LARGURA, TIRO_ALTURA)
+)
 
 velocidade_tiro = 10
 
@@ -305,7 +337,7 @@ while executando:
         )
 
         # =========================
-        # MOVIMENTAÇÃO DOS TIROS
+        # MOVIMENTAÇÃO DOS LASERS
         # =========================
 
         for tiro in tiros:
@@ -331,7 +363,7 @@ while executando:
         )
 
         # =========================
-        # COLISÃO: TIRO X INIMIGO
+        # COLISÃO: LASER X INIMIGO
         # =========================
 
         for tiro in tiros[:]:
@@ -413,7 +445,7 @@ while executando:
     desenhar_cenario()
 
     # =========================
-    # TELA DO MENU
+    # MENU
     # =========================
 
     if estado_jogo == MENU:
@@ -503,30 +535,26 @@ while executando:
         )
 
     # =========================
-    # TELA DO JOGO
+    # JOGO
     # =========================
 
     elif estado_jogo == JOGANDO:
 
-        # Jogador
-        pygame.draw.rect(
-            tela,
-            (0, 255, 0),
-            (
-                jogador_x,
-                jogador_y,
-                JOGADOR_LARGURA,
-                JOGADOR_ALTURA
-            )
+        # Nave
+        tela.blit(
+            imagem_jogador,
+            (jogador_x, jogador_y)
         )
 
-        # Tiros
+        # =========================
+        # DESENHA OS LASERS
+        # =========================
+
         for tiro in tiros:
 
-            pygame.draw.rect(
-                tela,
-                (255, 255, 0),
-                tiro
+            tela.blit(
+                imagem_laser,
+                (tiro.x, tiro.y)
             )
 
         # Inimigo
@@ -663,5 +691,4 @@ while executando:
 
     relogio.tick(FPS)
 
-# Encerra o Pygame
 pygame.quit()
