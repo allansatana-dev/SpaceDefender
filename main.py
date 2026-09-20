@@ -18,6 +18,20 @@ pygame.display.set_caption("Space Defender")
 relogio = pygame.time.Clock()
 
 # =========================
+# MÚSICA DE FUNDO
+# =========================
+
+pygame.mixer.music.load(
+    "assets/sounds/Level3.mp3"
+)
+
+# Volume de 0.0 até 1.0
+pygame.mixer.music.set_volume(0.4)
+
+# -1 significa repetir indefinidamente
+pygame.mixer.music.play(-1)
+
+# =========================
 # FONTES
 # =========================
 
@@ -64,8 +78,6 @@ imagem_jogador = pygame.image.load(
     "assets/images/playerShip1_red.png"
 ).convert_alpha()
 
-# A imagem original aponta para cima.
-# Rotacionamos para a direita.
 imagem_jogador = pygame.transform.rotate(
     imagem_jogador,
     -90
@@ -94,8 +106,6 @@ imagem_laser = pygame.image.load(
     "assets/images/laserRed01.png"
 ).convert_alpha()
 
-# O laser original está na vertical.
-# Rotacionamos para apontar para a direita.
 imagem_laser = pygame.transform.rotate(
     imagem_laser,
     -90
@@ -158,8 +168,7 @@ velocidade_tiro_inimigo = 6
 
 tiros_inimigo = []
 
-# Intervalo entre os disparos
-# Valores em milissegundos
+# Intervalos em milissegundos
 INTERVALO_TIRO_MIN = 1200
 INTERVALO_TIRO_MAX = 2500
 
@@ -175,7 +184,6 @@ proximo_intervalo_tiro = random.randint(
 # =========================
 
 pontos = 0
-
 META_VITORIA = 10
 
 # =========================
@@ -281,10 +289,6 @@ while executando:
 
         if evento.type == pygame.KEYDOWN:
 
-            # =========================
-            # EVENTOS DO MENU
-            # =========================
-
             if estado_jogo == MENU:
 
                 if evento.key == pygame.K_RETURN:
@@ -295,10 +299,6 @@ while executando:
                 elif evento.key == pygame.K_ESCAPE:
 
                     executando = False
-
-            # =========================
-            # EVENTOS DURANTE O JOGO
-            # =========================
 
             elif estado_jogo == JOGANDO:
 
@@ -316,10 +316,6 @@ while executando:
                 elif evento.key == pygame.K_ESCAPE:
 
                     estado_jogo = MENU
-
-            # =========================
-            # EVENTOS DA TELA FINAL
-            # =========================
 
             elif estado_jogo == GAME_OVER or estado_jogo == VITORIA:
 
@@ -437,10 +433,8 @@ while executando:
         # =========================
 
         for tiro_inimigo in tiros_inimigo:
-
             tiro_inimigo.x -= velocidade_tiro_inimigo
 
-        # Remove tiros que saíram da tela
         tiros_inimigo = [
             tiro_inimigo
             for tiro_inimigo in tiros_inimigo
@@ -649,11 +643,7 @@ while executando:
             (jogador_x, jogador_y)
         )
 
-        # =========================
-        # DESENHA OS LASERS
-        # DO JOGADOR
-        # =========================
-
+        # Lasers do jogador
         for tiro in tiros:
 
             tela.blit(
@@ -661,20 +651,13 @@ while executando:
                 (tiro.x, tiro.y)
             )
 
-        # =========================
-        # DESENHA O INIMIGO
-        # =========================
-
+        # Inimigo
         tela.blit(
             imagem_inimigo,
             (inimigo_x, inimigo_y)
         )
 
-        # =========================
-        # DESENHA OS TIROS
-        # DO INIMIGO
-        # =========================
-
+        # Tiros do inimigo
         for tiro_inimigo in tiros_inimigo:
 
             tela.blit(
@@ -682,10 +665,7 @@ while executando:
                 (tiro_inimigo.x, tiro_inimigo.y)
             )
 
-        # =========================
-        # PONTUAÇÃO
-        # =========================
-
+        # Pontuação
         texto_pontos = fonte.render(
             f"Pontos: {pontos}/{META_VITORIA}",
             True,
@@ -697,10 +677,7 @@ while executando:
             (20, 20)
         )
 
-        # =========================
-        # VIDAS
-        # =========================
-
+        # Vidas
         texto_vidas = fonte.render(
             f"Vidas: {vidas}",
             True,

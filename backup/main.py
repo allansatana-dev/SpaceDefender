@@ -87,7 +87,7 @@ jogador_y = ALTURA // 2
 vidas = 3
 
 # =========================
-# LASER
+# LASER DO JOGADOR
 # =========================
 
 imagem_laser = pygame.image.load(
@@ -139,6 +139,38 @@ inimigo_y = random.randint(
 )
 
 # =========================
+# TIRO DO INIMIGO
+# =========================
+
+imagem_tiro_inimigo = pygame.image.load(
+    "assets/images/Enemy3Shot.png"
+).convert_alpha()
+
+TIRO_INIMIGO_LARGURA = 35
+TIRO_INIMIGO_ALTURA = 10
+
+imagem_tiro_inimigo = pygame.transform.scale(
+    imagem_tiro_inimigo,
+    (TIRO_INIMIGO_LARGURA, TIRO_INIMIGO_ALTURA)
+)
+
+velocidade_tiro_inimigo = 6
+
+tiros_inimigo = []
+
+# Intervalo entre os disparos
+# Valores em milissegundos
+INTERVALO_TIRO_MIN = 1200
+INTERVALO_TIRO_MAX = 2500
+
+ultimo_tiro_inimigo = pygame.time.get_ticks()
+
+proximo_intervalo_tiro = random.randint(
+    INTERVALO_TIRO_MIN,
+    INTERVALO_TIRO_MAX
+)
+
+# =========================
 # PONTUAÇÃO
 # =========================
 
@@ -168,8 +200,11 @@ def reiniciar_jogo():
     global vidas
     global pontos
     global tiros
+    global tiros_inimigo
     global inimigo_x
     global inimigo_y
+    global ultimo_tiro_inimigo
+    global proximo_intervalo_tiro
 
     jogador_x = 100
     jogador_y = ALTURA // 2
@@ -178,12 +213,20 @@ def reiniciar_jogo():
     pontos = 0
 
     tiros = []
+    tiros_inimigo = []
 
     inimigo_x = 700
 
     inimigo_y = random.randint(
         0,
         ALTURA - INIMIGO_ALTURA
+    )
+
+    ultimo_tiro_inimigo = pygame.time.get_ticks()
+
+    proximo_intervalo_tiro = random.randint(
+        INTERVALO_TIRO_MIN,
+        INTERVALO_TIRO_MAX
     )
 
 # =========================
@@ -363,6 +406,48 @@ while executando:
         )
 
         # =========================
+        # INIMIGO ATIRA
+        # =========================
+
+        tempo_atual = pygame.time.get_ticks()
+
+        if tempo_atual - ultimo_tiro_inimigo >= proximo_intervalo_tiro:
+
+            novo_tiro_inimigo = pygame.Rect(
+                inimigo_x,
+                inimigo_y + INIMIGO_ALTURA // 2 - TIRO_INIMIGO_ALTURA // 2,
+                TIRO_INIMIGO_LARGURA,
+                TIRO_INIMIGO_ALTURA
+            )
+
+            tiros_inimigo.append(
+                novo_tiro_inimigo
+            )
+
+            ultimo_tiro_inimigo = tempo_atual
+
+            proximo_intervalo_tiro = random.randint(
+                INTERVALO_TIRO_MIN,
+                INTERVALO_TIRO_MAX
+            )
+
+        # =========================
+        # MOVIMENTAÇÃO DOS TIROS
+        # DO INIMIGO
+        # =========================
+
+        for tiro_inimigo in tiros_inimigo:
+
+            tiro_inimigo.x -= velocidade_tiro_inimigo
+
+        # Remove tiros que saíram da tela
+        tiros_inimigo = [
+            tiro_inimigo
+            for tiro_inimigo in tiros_inimigo
+            if tiro_inimigo.right > 0
+        ]
+
+        # =========================
         # COLISÃO: LASER X INIMIGO
         # =========================
 
@@ -392,7 +477,25 @@ while executando:
         )
 
         # =========================
-        # COLISÃO: JOGADOR X INIMIGO
+        # COLISÃO:
+        # TIRO INIMIGO X JOGADOR
+        # =========================
+
+        for tiro_inimigo in tiros_inimigo[:]:
+
+            if tiro_inimigo.colliderect(jogador_rect):
+
+                tiros_inimigo.remove(
+                    tiro_inimigo
+                )
+
+                vidas -= 1
+
+                break
+
+        # =========================
+        # COLISÃO:
+        # JOGADOR X INIMIGO
         # =========================
 
         if jogador_rect.colliderect(inimigo_rect):
@@ -548,6 +651,7 @@ while executando:
 
         # =========================
         # DESENHA OS LASERS
+        # DO JOGADOR
         # =========================
 
         for tiro in tiros:
@@ -557,13 +661,31 @@ while executando:
                 (tiro.x, tiro.y)
             )
 
-        # Inimigo
+        # =========================
+        # DESENHA O INIMIGO
+        # =========================
+
         tela.blit(
             imagem_inimigo,
             (inimigo_x, inimigo_y)
         )
 
-        # Pontuação
+        # =========================
+        # DESENHA OS TIROS
+        # DO INIMIGO
+        # =========================
+
+        for tiro_inimigo in tiros_inimigo:
+
+            tela.blit(
+                imagem_tiro_inimigo,
+                (tiro_inimigo.x, tiro_inimigo.y)
+            )
+
+        # =========================
+        # PONTUAÇÃO
+        # =========================
+
         texto_pontos = fonte.render(
             f"Pontos: {pontos}/{META_VITORIA}",
             True,
@@ -575,7 +697,10 @@ while executando:
             (20, 20)
         )
 
-        # Vidas
+        # =========================
+        # VIDAS
+        # =========================
+
         texto_vidas = fonte.render(
             f"Vidas: {vidas}",
             True,
